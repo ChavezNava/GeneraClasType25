@@ -1,0 +1,441 @@
+// Datos del arma base
+const baseWeapon = {
+    nombre: "Type 25-",
+    dano: 24,
+    cadencia: 86,
+    precision: 44,
+    movilidad: 83,
+    alcance: 47,
+    control: 46
+};
+
+// Datos de todos los accesorios
+const accesorios = {
+    BOCA_DE_CANON: {
+        SILENCIADOR_TACTICO: { Id: "1A", dano: 0, cadencia: 0, precision: 0, movilidad: -2, alcance: 0, control: 0 },
+        SILENCIADOR_LIGERO_OWC: { Id: "1B", dano: 0, cadencia: 0, precision: 0, movilidad: 0, alcance: -7, control: 0 },
+        SILENCIADOR_MONOLITICO: { Id: "1C", dano: 0, cadencia: 0, precision: -3, movilidad: -5, alcance: 8, control: 0 },
+        COMPENSADOR_LIGERO_OWC: { Id: "1D", dano: 0, cadencia: 0, precision: 0, movilidad: -2, alcance: 0, control: 6 },
+        SUPRESOR_DE_FOGONAZO_LIGERO_DE_MIP: { Id: "1E", dano: 0, cadencia: 0, precision: 2, movilidad: -2, alcance: 0, control: 0 },
+        FRENO_DE_BOCA_LIGERO_RTC: { Id: "1F", dano: 0, cadencia: 0, precision: 1, movilidad: -2, alcance: 0, control: 4 }
+    },
+    CANON: {
+        CANON_LIGERO_MIP: { Id: "2A", dano: 0, cadencia: 0, precision: -3, movilidad: 3, alcance: 0, control: -1 },
+        CANON_LIGERO_CORTO_MIP: { Id: "2B", dano: 0, cadencia: 0, precision: -2, movilidad: 4, alcance: 0, control: -4 },
+        CANON_LIGERO_Y_EXTENDIDO_DE_MIP: { Id: "2C", dano: 0, cadencia: 0, precision: 3, movilidad: -5, alcance: 6, control: 0 }
+    },
+    CULATA: {
+        CULATA_LIGERA_YKM: { Id: "4A", dano: 0, cadencia: 0, precision: -3, movilidad: 2, alcance: 0, control: -1 },
+        CULATA_COMBAT_YKM: { Id: "4B", dano: 0, cadencia: 0, precision: -6, movilidad: 6, alcance: 0, control: -2 },
+        CULATA_ESTABLE_RTC: { Id: "4C", dano: 0, cadencia: 0, precision: 9, movilidad: -2, alcance: 0, control: 0 }
+    },
+    VENTAJA: {
+        PRESTIDIGITACION: { Id: "5B", dano: 0, cadencia: 0, precision: 0, movilidad: 1, alcance: 0, control: 0 },
+        TIRO_LEJANO: { Id: "5G", dano: 0, cadencia: 0, precision: 0, movilidad: 0, alcance: 3, control: 0 }
+    },
+    LASER: {
+        LASER_1_MW_RTC: { Id: "6A", dano: 0, cadencia: 0, precision: 2, movilidad: 0, alcance: 0, control: 0 },
+        LASER_5MW_DE_MIP: { Id: "6B", dano: 0, cadencia: 0, precision: 2, movilidad: 4, alcance: 0, control: 0 },
+        LASER_TACTICO_OWC: { Id: "6C", dano: 0, cadencia: 0, precision: 4, movilidad: 3, alcance: 0, control: 0 }
+    },
+    ACOPLE: {
+        EMPUNADURA_FRONTAL_DE_ATAQUE: { Id: "7A", dano: 0, cadencia: 0, precision: 3, movilidad: -3, alcance: 0, control: 4 },
+        EMPUNADURA_FRONTAL_DE_MERCENARIO: { Id: "7B", dano: 0, cadencia: 0, precision: 2, movilidad: -6, alcance: 0, control: 3 },
+        EMPUNADURA_FRONTAL_DE_OPERADOR: { Id: "7C", dano: 0, cadencia: 0, precision: 0, movilidad: -4, alcance: 0, control: 7 },
+        EMPUNADURA_FRONTAL_DE_RANGER: { Id: "7D", dano: 0, cadencia: 0, precision: 5, movilidad: -8, alcance: 0, control: 7 },
+        EMPUNADURA_FRONTAL_TACTICA_A: { Id: "7E", dano: 0, cadencia: 0, precision: 3, movilidad: -1, alcance: 0, control: 0 }
+    },
+    AGARRE_TRASERO: {
+        ADHESIVO_DE_EMPUNADURA_GRANULADO: { Id: "8A", dano: 0, cadencia: 0, precision: 6, movilidad: -1, alcance: 0, control: 0 },
+        EMPUNADURA_ADHESIVO_ENGOMADO: { Id: "8B", dano: 0, cadencia: 0, precision: -3, movilidad: 0, alcance: 0, control: 6 },
+        ADHESIVO_DE_EMPUNADURA_PUNTEADO: { Id: "8C", dano: 0, cadencia: 0, precision: 5, movilidad: 4, alcance: 0, control: -2 }
+    },
+    MUNICION: {
+        CARGADOR_AMPLIADO_A_38_BALAS: { Id: "9A", dano: 0, cadencia: 0, precision: 0, movilidad: -1, alcance: 0, control: 0 },
+        CARGADOR_AMPLIADO_A_46_BALAS: { Id: "9B", dano: 0, cadencia: 0, precision: 0, movilidad: -5, alcance: 0, control: 0 },
+        RECARGA_RAPIDA: { Id: "9C", dano: 0, cadencia: 0, precision: 0, movilidad: 2, alcance: 0, control: 0 },
+        RECARGA_RAPIDA_DE_42_BALAS: { Id: "9D", dano: 0, cadencia: 0, precision: 0, movilidad: -4, alcance: 0, control: 0 },
+        RECARGA_DE_FUERZA_VULNERANTE: { Id: "9E", dano: 4, cadencia: 0, precision: -6, movilidad: 0, alcance: 0, control: -5 }
+    }
+};
+
+// Función principal para calcular las mejores combinaciones
+function calcularMejoresCombinaciones(atributosSeleccionados) {
+    const resultados = {};
+    
+    // Para cada cantidad de accesorios (1 a 5)
+    for (let cantidad = 1; cantidad <= 5; cantidad++) {
+        const mejorCombinacion = encontrarMejorCombinacionConCategorias(
+            atributosSeleccionados, 
+            cantidad
+        );
+        
+        if (mejorCombinacion) {
+            resultados[cantidad] = mejorCombinacion;
+        }
+    }
+    
+    return resultados;
+}
+
+// Función para encontrar la mejor combinación respetando categorías
+function encontrarMejorCombinacionConCategorias(atributosSeleccionados, cantidadDeseada) {
+    // Obtener todos los accesorios organizados por categoría
+    const todosAccesorios = obtenerTodosAccesoriosOrganizados();
+    
+    // Encontrar los mejores accesorios por categoría para los atributos seleccionados
+    const mejoresPorCategoria = {};
+    
+    for (let categoria in todosAccesorios) {
+        let mejorAccesorio = null;
+        let mejorPuntuacion = -Infinity;
+        
+        todosAccesorios[categoria].forEach(accesorio => {
+            const puntuacion = calcularPuntuacionParaAtributos(accesorio, atributosSeleccionados);
+            if (puntuacion > mejorPuntuacion) {
+                mejorPuntuacion = puntuacion;
+                mejorAccesorio = accesorio;
+            }
+        });
+        
+        if (mejorAccesorio) {
+            mejoresPorCategoria[categoria] = {
+                accesorio: mejorAccesorio,
+                puntuacion: mejorPuntuacion
+            };
+        }
+    }
+    
+    // Ordenar categorías por puntuación (de mayor a menor)
+    const categoriasOrdenadas = Object.keys(mejoresPorCategoria).sort((a, b) => {
+        return mejoresPorCategoria[b].puntuacion - mejoresPorCategoria[a].puntuacion;
+    });
+    
+    // Tomar las mejores categorías hasta alcanzar la cantidad deseada
+    const combinacion = [];
+    for (let i = 0; i < Math.min(cantidadDeseada, categoriasOrdenadas.length); i++) {
+        const categoria = categoriasOrdenadas[i];
+        combinacion.push(mejoresPorCategoria[categoria].accesorio);
+    }
+    
+    // Si necesitamos más accesorios, buscar en las categorías restantes
+    if (combinacion.length < cantidadDeseada) {
+        const categoriasRestantes = Object.keys(todosAccesorios).filter(
+            cat => !combinacion.some(acc => obtenerCategoriaPorId(acc.Id) === cat)
+        );
+        
+        for (let categoria of categoriasRestantes) {
+            if (combinacion.length >= cantidadDeseada) break;
+            
+            let mejorAccesorio = null;
+            let mejorPuntuacion = -Infinity;
+            
+            todosAccesorios[categoria].forEach(accesorio => {
+                const puntuacion = calcularPuntuacionParaAtributos(accesorio, atributosSeleccionados);
+                if (puntuacion > mejorPuntuacion) {
+                    mejorPuntuacion = puntuacion;
+                    mejorAccesorio = accesorio;
+                }
+            });
+            
+            if (mejorAccesorio) {
+                combinacion.push(mejorAccesorio);
+            }
+        }
+    }
+    
+    // Ordenar los accesorios por ID de forma ascendente
+    combinacion.sort((a, b) => a.Id.localeCompare(b.Id));
+    
+    // Calcular estadísticas finales
+    const estadisticasFinales = calcularEstadisticasFinales(combinacion);
+    const puntuacionTotal = calcularPuntuacionTotal(estadisticasFinales, atributosSeleccionados);
+    const mejoraAtributos = calcularMejoraAtributos(atributosSeleccionados, estadisticasFinales);
+    
+    return {
+        accesorios: combinacion,
+        puntuacionTotal: puntuacionTotal,
+        estadisticasFinales: estadisticasFinales,
+        mejoraAtributos: mejoraAtributos
+    };
+}
+
+// Función para obtener todos los accesorios organizados por categoría
+function obtenerTodosAccesoriosOrganizados() {
+    const organizados = {};
+    
+    for (let categoria in accesorios) {
+        organizados[categoria] = [];
+        for (let nombre in accesorios[categoria]) {
+            organizados[categoria].push(accesorios[categoria][nombre]);
+        }
+    }
+    
+    return organizados;
+}
+
+// Función para obtener la categoría de un accesorio por su ID
+function obtenerCategoriaPorId(id) {
+    for (let categoria in accesorios) {
+        for (let nombre in accesorios[categoria]) {
+            if (accesorios[categoria][nombre].Id === id) {
+                return categoria;
+            }
+        }
+    }
+    return null;
+}
+
+// Función para calcular la puntuación de un accesorio para los atributos seleccionados
+function calcularPuntuacionParaAtributos(accesorio, atributosSeleccionados) {
+    let puntuacion = 0;
+    atributosSeleccionados.forEach(atributo => {
+        puntuacion += accesorio[atributo];
+    });
+    return puntuacion;
+}
+
+// Función para calcular las estadísticas finales
+function calcularEstadisticasFinales(accesoriosSeleccionados) {
+    const estadisticas = { ...baseWeapon };
+    
+    accesoriosSeleccionados.forEach(accesorio => {
+        for (let stat in accesorio) {
+            if (stat !== 'Id' && stat !== 'nombre') {
+                estadisticas[stat] += accesorio[stat];
+            }
+        }
+    });
+    
+    return estadisticas;
+}
+
+// Función para calcular la puntuación total
+function calcularPuntuacionTotal(estadisticasFinales, atributosSeleccionados) {
+    let puntuacion = 0;
+    atributosSeleccionados.forEach(atributo => {
+        puntuacion += estadisticasFinales[atributo];
+    });
+    return puntuacion;
+}
+
+// Función para calcular la mejora en los atributos seleccionados
+function calcularMejoraAtributos(atributosSeleccionados, estadisticasFinales) {
+    const mejora = {};
+    const estadisticasBase = { ...baseWeapon };
+    
+    atributosSeleccionados.forEach(atributo => {
+        mejora[atributo] = estadisticasFinales[atributo] - estadisticasBase[atributo];
+    });
+    
+    return mejora;
+}
+
+// Función para generar el nombre de la configuración (ordenado ascendente)
+function generarNombreConfiguracion(accesorios) {
+    // Ordenar los accesorios por ID de forma ascendente
+    const accesoriosOrdenados = [...accesorios].sort((a, b) => a.Id.localeCompare(b.Id));
+    const ids = accesoriosOrdenados.map(accesorio => accesorio.Id).join('');
+    return `Type 25-${ids}`;
+}
+
+// Función para formatear el nombre del atributo
+function formatearAtributo(atributo) {
+    const nombres = {
+        'dano': 'Daño',
+        'cadencia': 'Cadencia',
+        'precision': 'Precisión',
+        'movilidad': 'Movilidad',
+        'alcance': 'Alcance',
+        'control': 'Control'
+    };
+    return nombres[atributo] || atributo;
+}
+
+// Función para mostrar los resultados en la página
+function mostrarResultados(atributosSeleccionados, resultados) {
+    const resultadosContainer = document.getElementById('results');
+    resultadosContainer.innerHTML = '';
+    
+    if (atributosSeleccionados.length === 0) {
+        resultadosContainer.innerHTML = '<div class="no-results">Selecciona al menos un atributo para calcular las mejores configuraciones</div>';
+        return;
+    }
+    
+    // Crear tarjeta de resultados
+    const resultCard = document.createElement('div');
+    resultCard.className = 'result-card';
+    
+    const resultHeader = document.createElement('div');
+    resultHeader.className = 'result-header';
+    
+    const atributosTexto = atributosSeleccionados.map(atributo => formatearAtributo(atributo)).join(', ');
+    const resultTitle = document.createElement('h3');
+    resultTitle.className = 'result-title';
+    resultTitle.textContent = `Mejores Configuraciones para: ${atributosTexto}`;
+    
+    resultHeader.appendChild(resultTitle);
+    resultCard.appendChild(resultHeader);
+    
+    // Mostrar resultados para cada cantidad de accesorios
+    const resultadosList = document.createElement('div');
+    resultadosList.className = 'resultados-list';
+    
+    for (let cantidad in resultados) {
+        const combinacion = resultados[cantidad];
+        const item = document.createElement('div');
+        item.className = 'resultado-item';
+        
+        // Nombre de la configuración (ya ordenado)
+        const configName = document.createElement('div');
+        configName.className = 'config-name';
+        configName.textContent = generarNombreConfiguracion(combinacion.accesorios);
+        
+        // Descripción de la configuración
+        const configDesc = document.createElement('div');
+        configDesc.className = 'config-desc';
+        
+        const mejoraText = atributosSeleccionados.map(atributo => {
+            const mejora = combinacion.mejoraAtributos[atributo];
+            const signo = mejora > 0 ? '+' : '';
+            return `${formatearAtributo(atributo)}: ${signo}${mejora}`;
+        }).join(' | ');
+        
+        // Información de categorías utilizadas
+        const categoriasUtilizadas = combinacion.accesorios.map(acc => 
+            obtenerCategoriaPorId(acc.Id)
+        ).join(', ');
+        
+        configDesc.innerHTML = `
+            <strong>${cantidad} accesorio(s)</strong><br>
+            ${mejoraText}<br>
+            <small>Categorías: ${categoriasUtilizadas}</small>
+        `;
+        
+        // Botón copiar
+        const copyBtn = document.createElement('button');
+        copyBtn.className = 'copy-btn';
+        copyBtn.textContent = 'Copiar';
+        copyBtn.onclick = () => copiarTexto(generarNombreConfiguracion(combinacion.accesorios));
+        
+        // Detalles de accesorios
+        const detallesBtn = document.createElement('button');
+        detallesBtn.className = 'detalles-btn';
+        detallesBtn.textContent = 'Ver Accesorios';
+        detallesBtn.onclick = () => mostrarDetallesAccesorios(combinacion.accesorios);
+        
+        const accionesContainer = document.createElement('div');
+        accionesContainer.className = 'acciones-container';
+        accionesContainer.appendChild(copyBtn);
+        accionesContainer.appendChild(detallesBtn);
+        
+        item.appendChild(configName);
+        item.appendChild(configDesc);
+        item.appendChild(accionesContainer);
+        resultadosList.appendChild(item);
+    }
+    
+    resultCard.appendChild(resultadosList);
+    resultadosContainer.appendChild(resultCard);
+}
+
+// Función para mostrar detalles de los accesorios
+function mostrarDetallesAccesorios(accesorios) {
+    const detalles = accesorios.map(accesorio => {
+        const nombre = obtenerNombreAccesorio(accesorio.Id);
+        const categoria = obtenerCategoriaPorId(accesorio.Id);
+        const stats = [];
+        
+        for (let stat in accesorio) {
+            if (stat !== 'Id' && stat !== 'nombre' && accesorio[stat] !== 0) {
+                const signo = accesorio[stat] > 0 ? '+' : '';
+                stats.push(`${formatearAtributo(stat)}: ${signo}${accesorio[stat]}`);
+            }
+        }
+        
+        return `${nombre} (${accesorio.Id}) - ${categoria}: ${stats.join(', ')}`;
+    }).join('\n');
+    
+    alert('Accesorios utilizados:\n\n' + detalles);
+}
+
+// Función para obtener el nombre completo del accesorio
+function obtenerNombreAccesorio(id) {
+    for (let tipo in accesorios) {
+        for (let nombre in accesorios[tipo]) {
+            if (accesorios[tipo][nombre].Id === id) {
+                return nombre.replace(/_/g, ' ');
+            }
+        }
+    }
+    return 'Accesorio desconocido';
+}
+
+// Función para copiar texto al portapapeles
+function copiarTexto(texto) {
+    navigator.clipboard.writeText(texto).then(() => {
+        mostrarMensajeCopiado();
+    }).catch(err => {
+        console.error('Error al copiar: ', err);
+        // Fallback para navegadores antiguos
+        const textArea = document.createElement('textarea');
+        textArea.value = texto;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        mostrarMensajeCopiado();
+    });
+}
+
+// Función para mostrar mensaje de copiado
+function mostrarMensajeCopiado() {
+    const mensaje = document.createElement('div');
+    mensaje.className = 'copy-message';
+    mensaje.textContent = '¡Clase copiada!';
+    mensaje.style.position = 'fixed';
+    mensaje.style.top = '20px';
+    mensaje.style.right = '20px';
+    mensaje.style.background = '#2ecc71';
+    mensaje.style.color = 'white';
+    mensaje.style.padding = '10px 20px';
+    mensaje.style.borderRadius = '5px';
+    mensaje.style.zIndex = '1000';
+    mensaje.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
+    
+    document.body.appendChild(mensaje);
+    
+    setTimeout(() => {
+        document.body.removeChild(mensaje);
+    }, 2000);
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('calculate').addEventListener('click', function() {
+        // Obtener atributos seleccionados
+        const atributosSeleccionados = [];
+        const checkboxes = document.querySelectorAll('.attribute-checkbox input:checked');
+        
+        checkboxes.forEach(checkbox => {
+            atributosSeleccionados.push(checkbox.value);
+        });
+        
+        // Calcular mejores combinaciones
+        const resultados = calcularMejoresCombinaciones(atributosSeleccionados);
+        
+        // Mostrar resultados
+        mostrarResultados(atributosSeleccionados, resultados);
+    });
+
+    document.getElementById('clear').addEventListener('click', function() {
+        // Desmarcar todos los checkboxes
+        const checkboxes = document.querySelectorAll('.attribute-checkbox input');
+        checkboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        
+        // Limpiar resultados
+        document.getElementById('results').innerHTML = '';
+    });
+});

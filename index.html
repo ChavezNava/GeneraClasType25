@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Optimizador Type 25 - Call of Duty Mobile</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Optimizador Type 25</h1>
+            <p class="subtitle">Selecciona los atributos que quieres mejorar y encuentra la mejor configuración</p>
+        </header>
+        
+        <div class="stats-container">
+            <div class="base-stats">
+                <h2>Estadísticas Base</h2>
+                <div class="stat-row">
+                    <span class="stat-name">Daño</span>
+                    <span class="stat-value">24</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-name">Cadencia</span>
+                    <span class="stat-value">86</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-name">Precisión</span>
+                    <span class="stat-value">44</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-name">Movilidad</span>
+                    <span class="stat-value">83</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-name">Alcance</span>
+                    <span class="stat-value">47</span>
+                </div>
+                <div class="stat-row">
+                    <span class="stat-name">Control</span>
+                    <span class="stat-value">46</span>
+                </div>
+            </div>
+            
+            <div class="attribute-selector">
+                <h2>Atributos a Mejorar</h2>
+                <div class="attribute-grid">
+                    <label class="attribute-checkbox">
+                        <input type="checkbox" id="dano" value="dano">
+                        <span>Daño</span>
+                    </label>
+                    <label class="attribute-checkbox">
+                        <input type="checkbox" id="cadencia" value="cadencia">
+                        <span>Cadencia</span>
+                    </label>
+                    <label class="attribute-checkbox">
+                        <input type="checkbox" id="precision" value="precision">
+                        <span>Precisión</span>
+                    </label>
+                    <label class="attribute-checkbox">
+                        <input type="checkbox" id="movilidad" value="movilidad">
+                        <span>Movilidad</span>
+                    </label>
+                    <label class="attribute-checkbox">
+                        <input type="checkbox" id="alcance" value="alcance">
+                        <span>Alcance</span>
+                    </label>
+                    <label class="attribute-checkbox">
+                        <input type="checkbox" id="control" value="control">
+                        <span>Control</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+        
+        <div class="buttons">
+            <button id="calculate">Calcular Mejores Accesorios</button>
+            <button id="clear" class="clear">Limpiar Selección</button>
+        </div>
+        
+        <div class="results" id="results">
+            <!-- Los resultados se mostrarán aquí -->
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
