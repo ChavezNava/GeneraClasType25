@@ -4,7 +4,7 @@ class VisitorCounter {
         this.GITHUB_TOKEN = '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';
         this.REPO_OWNER = 'ChavezNava';
         this.REPO_NAME = 'GeneraClasType25';
-        this.ISSUE_NUMBER = 1;
+        this.ISSUE_NUMBER = 2;
         
         this.init();
     }
