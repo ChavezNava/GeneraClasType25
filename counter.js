@@ -5,7 +5,7 @@ class VisitorCounter {
         this.GITHUB_TOKEN = null; // Se pedirá al usuario o se configurará manualmente
         this.REPO_OWNER = null;   // Tu usuario de GitHub
         this.REPO_NAME = null;    // Nombre de tu repositorio
-        this.ISSUE_NUMBER = 1;    // Número del issue que crearás
+        this.ISSUE_NUMBER = 2;    // Número del issue que crearás
         
         this.init();
     }
