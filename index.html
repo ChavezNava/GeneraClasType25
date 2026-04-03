@@ -7,8 +7,69 @@
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
+    <!-- Pantalla de Login/Registro -->
+    <div id="authScreen" class="auth-screen">
+        <div class="auth-container">
+            <div class="auth-header">
+                <h1>🎮 Type 25 Optimizer</h1>
+                <p>Optimiza tu clase al máximo nivel</p>
+            </div>
+            
+            <div class="auth-tabs">
+                <button class="auth-tab active" data-tab="login">Iniciar Sesión</button>
+                <button class="auth-tab" data-tab="register">Registrarse</button>
+            </div>
+            
+            <!-- Formulario de Login -->
+            <form id="loginForm" class="auth-form active">
+                <div class="input-group">
+                    <label>📧 Correo Electrónico</label>
+                    <input type="email" id="loginEmail" required placeholder="tu@email.com">
+                </div>
+                <div class="input-group">
+                    <label>🔒 Contraseña</label>
+                    <input type="password" id="loginPassword" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="auth-btn">Iniciar Sesión</button>
+            </form>
+            
+            <!-- Formulario de Registro -->
+            <form id="registerForm" class="auth-form">
+                <div class="input-group">
+                    <label>👤 Nombre de Usuario</label>
+                    <input type="text" id="registerName" required placeholder="Tu nombre">
+                </div>
+                <div class="input-group">
+                    <label>📧 Correo Electrónico</label>
+                    <input type="email" id="registerEmail" required placeholder="tu@email.com">
+                </div>
+                <div class="input-group">
+                    <label>🔒 Contraseña</label>
+                    <input type="password" id="registerPassword" required placeholder="Mínimo 6 caracteres">
+                </div>
+                <div class="input-group">
+                    <label>🔒 Confirmar Contraseña</label>
+                    <input type="password" id="registerConfirmPassword" required placeholder="••••••••">
+                </div>
+                <button type="submit" class="auth-btn">Registrarse</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Dashboard Principal (oculto hasta login) -->
+    <div id="mainApp" class="container" style="display: none;">
         <header>
+            <div class="header-top">
+                <div class="visitor-counter">
+                    <span class="counter-icon">👁️</span>
+                    <span id="visitorCount">0</span>
+                    <span>visitas totales</span>
+                </div>
+                <div class="user-info">
+                    <span id="userName">Usuario</span>
+                    <button id="logoutBtn" class="logout-btn">🚪 Cerrar Sesión</button>
+                </div>
+            </div>
             <h1>Optimizador Type 25</h1>
             <p class="subtitle">Selecciona los atributos que quieres mejorar y encuentra la mejor configuración</p>
         </header>
@@ -83,6 +144,8 @@
         </div>
     </div>
 
+    <script src="auth.js"></script>
+    <script src="counter.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
