@@ -3,7 +3,7 @@
 
 const CONFIG = {
     // Tu token personal de GitHub (crearlo en Settings -> Developer settings -> Personal access tokens)
-    GITHUB_TOKEN: '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',
+    GITHUB_TOKEN: 'tu-tokent',
     
     // Tu nombre de usuario de GitHub
     REPO_OWNER: 'ChavezNava',
