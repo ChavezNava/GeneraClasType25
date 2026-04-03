@@ -1,55 +1,62 @@
-// Sistema de Contador de Visitas usando GitHub Issues como "backend"
+// Sistema de Contador de Visitas - Versión Mejorada
 class VisitorCounter {
     constructor() {
-        // Configuración del repositorio (CAMBIAR ESTOS VALORES)
-        this.GITHUB_TOKEN = null; // Se pedirá al usuario o se configurará manualmente
-        this.REPO_OWNER = null;   // Tu usuario de GitHub
-        this.REPO_NAME = null;    // Nombre de tu repositorio
-        this.ISSUE_NUMBER = 2;    // Número del issue que crearás
+        this.GITHUB_TOKEN = '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';
+        this.REPO_OWNER = 'ChavezNava';
+        this.REPO_NAME = 'GeneraClasType25';
+        this.ISSUE_NUMBER = 1;
         
         this.init();
     }
     
     async init() {
-        // Intentar cargar configuración
-        await this.loadConfig();
+        console.log('Iniciando contador de visitas...');
+        
+        // Verificar conexión con GitHub
+        const connected = await this.testConnection();
+        
+        if (!connected) {
+            console.warn('Usando modo demo - No se pudo conectar a GitHub');
+            this.useDemoMode = true;
+            this.incrementDemoCounter();
+            await this.displayCounter();
+            return;
+        }
         
         // Verificar si es una visita única
         if (!this.hasVisitedBefore()) {
             await this.incrementCounter();
+        } else {
+            console.log('Visitante recurrente - no se incrementa el contador');
         }
         
         // Mostrar contador
         await this.displayCounter();
     }
     
-    async loadConfig() {
-        // Intentar cargar configuración desde archivo externo o localStorage
-        return new Promise((resolve) => {
-            // Primero intentar cargar desde config.js
-            if (typeof CONFIG !== 'undefined') {
-                this.GITHUB_TOKEN = CONFIG.GITHUB_TOKEN;
-                this.REPO_OWNER = CONFIG.REPO_OWNER;
-                this.REPO_NAME = CONFIG.REPO_NAME;
-                this.ISSUE_NUMBER = CONFIG.ISSUE_NUMBER;
-                resolve();
-            } 
-            // Si no, intentar cargar desde localStorage
-            else if (localStorage.getItem('github_config')) {
-                const config = JSON.parse(localStorage.getItem('github_config'));
-                this.GITHUB_TOKEN = config.GITHUB_TOKEN;
-                this.REPO_OWNER = config.REPO_OWNER;
-                this.REPO_NAME = config.REPO_NAME;
-                this.ISSUE_NUMBER = config.ISSUE_NUMBER;
-                resolve();
+    async testConnection() {
+        try {
+            console.log('Probando conexión con GitHub API...');
+            const url = `https://api.github.com/repos/${this.REPO_OWNER}/${this.REPO_NAME}`;
+            
+            const response = await fetch(url, {
+                headers: {
+                    'Authorization': `token ${this.GITHUB_TOKEN}`,
+                    'Accept': 'application/vnd.github.v3+json'
+                }
+            });
+            
+            if (response.ok) {
+                console.log('✅ Conexión exitosa con GitHub');
+                return true;
+            } else {
+                console.error('❌ Error de conexión:', response.status, response.statusText);
+                return false;
             }
-            // Si no hay configuración, usar modo demo
-            else {
-                console.warn('Usando modo demo - Configura GitHub para contador real');
-                this.useDemoMode = true;
-                resolve();
-            }
-        });
+        } catch (error) {
+            console.error('❌ Error de conexión:', error.message);
+            return false;
+        }
     }
     
     hasVisitedBefore() {
@@ -57,12 +64,13 @@ class VisitorCounter {
         const hasVisited = localStorage.getItem(visitorKey);
         
         if (!hasVisited) {
-            // Generar ID único para el visitante
             const visitorId = this.generateVisitorId();
             localStorage.setItem(visitorKey, visitorId);
+            console.log('Nuevo visitante - ID:', visitorId);
             return false;
         }
         
+        console.log('Visitante recurrente - ID:', hasVisited);
         return true;
     }
     
@@ -71,21 +79,19 @@ class VisitorCounter {
     }
     
     async incrementCounter() {
-        if (this.useDemoMode) {
-            this.incrementDemoCounter();
-            return;
-        }
-        
         try {
+            console.log('Intentando incrementar contador...');
+            
             // Obtener el issue actual
             const issue = await this.getIssue();
-            let counterData;
+            console.log('Issue obtenido:', issue.number);
             
+            let counterData;
             try {
-                // Intentar parsear el contenido del issue
                 counterData = JSON.parse(issue.body);
+                console.log('Contador actual:', counterData.count);
             } catch (e) {
-                // Si no existe, crear estructura inicial
+                console.warn('Issue no tiene formato válido, creando nuevo contador');
                 counterData = {
                     count: 0,
                     visitors: [],
@@ -93,15 +99,24 @@ class VisitorCounter {
                 };
             }
             
-            // Incrementar contador
-            counterData.count++;
-            counterData.visitors.push(this.getVisitorId());
-            
-            // Actualizar el issue
-            await this.updateIssue(counterData);
+            // Verificar si este visitante ya ha sido contado
+            const visitorId = this.getVisitorId();
+            if (!counterData.visitors.includes(visitorId)) {
+                counterData.count++;
+                counterData.visitors.push(visitorId);
+                counterData.lastUpdate = new Date().toISOString();
+                
+                console.log(`✅ Nueva visita registrada! Total: ${counterData.count}`);
+                
+                // Actualizar el issue
+                await this.updateIssue(counterData);
+            } else {
+                console.log('Visitante ya contado anteriormente');
+            }
             
         } catch (error) {
             console.error('Error al incrementar contador:', error);
+            this.useDemoMode = true;
             this.incrementDemoCounter();
         }
     }
@@ -117,7 +132,7 @@ class VisitorCounter {
         });
         
         if (!response.ok) {
-            throw new Error(`Error al obtener issue: ${response.status}`);
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
         
         return await response.json();
@@ -139,9 +154,10 @@ class VisitorCounter {
         });
         
         if (!response.ok) {
-            throw new Error(`Error al actualizar issue: ${response.status}`);
+            throw new Error(`Error ${response.status}: ${response.statusText}`);
         }
         
+        console.log('✅ Issue actualizado correctamente');
         return await response.json();
     }
     
@@ -156,6 +172,7 @@ class VisitorCounter {
                 localStorage.setItem('demo_counter', demoCount);
             }
             counterElement.textContent = demoCount;
+            console.log('Modo demo - Mostrando contador:', demoCount);
             return;
         }
         
@@ -163,6 +180,7 @@ class VisitorCounter {
             const issue = await this.getIssue();
             const counterData = JSON.parse(issue.body);
             counterElement.textContent = counterData.count;
+            console.log('Contador real:', counterData.count);
         } catch (error) {
             console.error('Error al mostrar contador:', error);
             counterElement.textContent = '?';
@@ -173,14 +191,17 @@ class VisitorCounter {
         let demoCount = localStorage.getItem('demo_counter');
         if (!demoCount) {
             demoCount = Math.floor(Math.random() * 100) + 50;
+            localStorage.setItem('demo_counter', demoCount);
+            console.log('Iniciando contador demo en:', demoCount);
         } else {
-            demoCount = parseInt(demoCount) + 1;
-        }
-        localStorage.setItem('demo_counter', demoCount);
-        
-        const counterElement = document.getElementById('visitorCount');
-        if (counterElement) {
-            counterElement.textContent = demoCount;
+            const wasVisited = localStorage.getItem('type25_visitor_id');
+            if (!wasVisited) {
+                demoCount = parseInt(demoCount) + 1;
+                localStorage.setItem('demo_counter', demoCount);
+                console.log('Demo: Nueva visita - Total:', demoCount);
+            } else {
+                console.log('Demo: Visitante recurrente');
+            }
         }
     }
     
@@ -189,9 +210,8 @@ class VisitorCounter {
     }
 }
 
-// Inicializar contador cuando el DOM esté listo
+// Inicializar contador
 document.addEventListener('DOMContentLoaded', () => {
-    // Esperar un poco para asegurar que el usuario está autenticado
     setTimeout(() => {
         const counter = new VisitorCounter();
     }, 500);
