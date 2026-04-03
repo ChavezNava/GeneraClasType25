@@ -63,7 +63,6 @@ const accesorios = {
 function calcularMejoresCombinaciones(atributosSeleccionados) {
     const resultados = {};
     
-    // Para cada cantidad de accesorios (1 a 5)
     for (let cantidad = 1; cantidad <= 5; cantidad++) {
         const mejorCombinacion = encontrarMejorCombinacionConCategorias(
             atributosSeleccionados, 
@@ -78,12 +77,8 @@ function calcularMejoresCombinaciones(atributosSeleccionados) {
     return resultados;
 }
 
-// Función para encontrar la mejor combinación respetando categorías
 function encontrarMejorCombinacionConCategorias(atributosSeleccionados, cantidadDeseada) {
-    // Obtener todos los accesorios organizados por categoría
     const todosAccesorios = obtenerTodosAccesoriosOrganizados();
-    
-    // Encontrar los mejores accesorios por categoría para los atributos seleccionados
     const mejoresPorCategoria = {};
     
     for (let categoria in todosAccesorios) {
@@ -106,19 +101,16 @@ function encontrarMejorCombinacionConCategorias(atributosSeleccionados, cantidad
         }
     }
     
-    // Ordenar categorías por puntuación (de mayor a menor)
     const categoriasOrdenadas = Object.keys(mejoresPorCategoria).sort((a, b) => {
         return mejoresPorCategoria[b].puntuacion - mejoresPorCategoria[a].puntuacion;
     });
     
-    // Tomar las mejores categorías hasta alcanzar la cantidad deseada
     const combinacion = [];
     for (let i = 0; i < Math.min(cantidadDeseada, categoriasOrdenadas.length); i++) {
         const categoria = categoriasOrdenadas[i];
         combinacion.push(mejoresPorCategoria[categoria].accesorio);
     }
     
-    // Si necesitamos más accesorios, buscar en las categorías restantes
     if (combinacion.length < cantidadDeseada) {
         const categoriasRestantes = Object.keys(todosAccesorios).filter(
             cat => !combinacion.some(acc => obtenerCategoriaPorId(acc.Id) === cat)
@@ -144,10 +136,8 @@ function encontrarMejorCombinacionConCategorias(atributosSeleccionados, cantidad
         }
     }
     
-    // Ordenar los accesorios por ID de forma ascendente
     combinacion.sort((a, b) => a.Id.localeCompare(b.Id));
     
-    // Calcular estadísticas finales
     const estadisticasFinales = calcularEstadisticasFinales(combinacion);
     const puntuacionTotal = calcularPuntuacionTotal(estadisticasFinales, atributosSeleccionados);
     const mejoraAtributos = calcularMejoraAtributos(atributosSeleccionados, estadisticasFinales);
@@ -160,7 +150,6 @@ function encontrarMejorCombinacionConCategorias(atributosSeleccionados, cantidad
     };
 }
 
-// Función para obtener todos los accesorios organizados por categoría
 function obtenerTodosAccesoriosOrganizados() {
     const organizados = {};
     
@@ -174,7 +163,6 @@ function obtenerTodosAccesoriosOrganizados() {
     return organizados;
 }
 
-// Función para obtener la categoría de un accesorio por su ID
 function obtenerCategoriaPorId(id) {
     for (let categoria in accesorios) {
         for (let nombre in accesorios[categoria]) {
@@ -186,7 +174,6 @@ function obtenerCategoriaPorId(id) {
     return null;
 }
 
-// Función para calcular la puntuación de un accesorio para los atributos seleccionados
 function calcularPuntuacionParaAtributos(accesorio, atributosSeleccionados) {
     let puntuacion = 0;
     atributosSeleccionados.forEach(atributo => {
@@ -195,7 +182,6 @@ function calcularPuntuacionParaAtributos(accesorio, atributosSeleccionados) {
     return puntuacion;
 }
 
-// Función para calcular las estadísticas finales
 function calcularEstadisticasFinales(accesoriosSeleccionados) {
     const estadisticas = { ...baseWeapon };
     
@@ -210,7 +196,6 @@ function calcularEstadisticasFinales(accesoriosSeleccionados) {
     return estadisticas;
 }
 
-// Función para calcular la puntuación total
 function calcularPuntuacionTotal(estadisticasFinales, atributosSeleccionados) {
     let puntuacion = 0;
     atributosSeleccionados.forEach(atributo => {
@@ -219,7 +204,6 @@ function calcularPuntuacionTotal(estadisticasFinales, atributosSeleccionados) {
     return puntuacion;
 }
 
-// Función para calcular la mejora en los atributos seleccionados
 function calcularMejoraAtributos(atributosSeleccionados, estadisticasFinales) {
     const mejora = {};
     const estadisticasBase = { ...baseWeapon };
@@ -231,15 +215,12 @@ function calcularMejoraAtributos(atributosSeleccionados, estadisticasFinales) {
     return mejora;
 }
 
-// Función para generar el nombre de la configuración (ordenado ascendente)
 function generarNombreConfiguracion(accesorios) {
-    // Ordenar los accesorios por ID de forma ascendente
     const accesoriosOrdenados = [...accesorios].sort((a, b) => a.Id.localeCompare(b.Id));
     const ids = accesoriosOrdenados.map(accesorio => accesorio.Id).join('');
     return `Type 25-${ids}`;
 }
 
-// Función para formatear el nombre del atributo
 function formatearAtributo(atributo) {
     const nombres = {
         'dano': 'Daño',
@@ -252,7 +233,6 @@ function formatearAtributo(atributo) {
     return nombres[atributo] || atributo;
 }
 
-// Función para mostrar los resultados en la página
 function mostrarResultados(atributosSeleccionados, resultados) {
     const resultadosContainer = document.getElementById('results');
     resultadosContainer.innerHTML = '';
@@ -262,7 +242,6 @@ function mostrarResultados(atributosSeleccionados, resultados) {
         return;
     }
     
-    // Crear tarjeta de resultados
     const resultCard = document.createElement('div');
     resultCard.className = 'result-card';
     
@@ -277,7 +256,6 @@ function mostrarResultados(atributosSeleccionados, resultados) {
     resultHeader.appendChild(resultTitle);
     resultCard.appendChild(resultHeader);
     
-    // Mostrar resultados para cada cantidad de accesorios
     const resultadosList = document.createElement('div');
     resultadosList.className = 'resultados-list';
     
@@ -286,12 +264,10 @@ function mostrarResultados(atributosSeleccionados, resultados) {
         const item = document.createElement('div');
         item.className = 'resultado-item';
         
-        // Nombre de la configuración (ya ordenado)
         const configName = document.createElement('div');
         configName.className = 'config-name';
         configName.textContent = generarNombreConfiguracion(combinacion.accesorios);
         
-        // Descripción de la configuración
         const configDesc = document.createElement('div');
         configDesc.className = 'config-desc';
         
@@ -301,7 +277,6 @@ function mostrarResultados(atributosSeleccionados, resultados) {
             return `${formatearAtributo(atributo)}: ${signo}${mejora}`;
         }).join(' | ');
         
-        // Información de categorías utilizadas
         const categoriasUtilizadas = combinacion.accesorios.map(acc => 
             obtenerCategoriaPorId(acc.Id)
         ).join(', ');
@@ -312,13 +287,11 @@ function mostrarResultados(atributosSeleccionados, resultados) {
             <small>Categorías: ${categoriasUtilizadas}</small>
         `;
         
-        // Botón copiar
         const copyBtn = document.createElement('button');
         copyBtn.className = 'copy-btn';
         copyBtn.textContent = 'Copiar';
         copyBtn.onclick = () => copiarTexto(generarNombreConfiguracion(combinacion.accesorios));
         
-        // Detalles de accesorios
         const detallesBtn = document.createElement('button');
         detallesBtn.className = 'detalles-btn';
         detallesBtn.textContent = 'Ver Accesorios';
@@ -339,7 +312,6 @@ function mostrarResultados(atributosSeleccionados, resultados) {
     resultadosContainer.appendChild(resultCard);
 }
 
-// Función para mostrar detalles de los accesorios
 function mostrarDetallesAccesorios(accesorios) {
     const detalles = accesorios.map(accesorio => {
         const nombre = obtenerNombreAccesorio(accesorio.Id);
@@ -359,7 +331,6 @@ function mostrarDetallesAccesorios(accesorios) {
     alert('Accesorios utilizados:\n\n' + detalles);
 }
 
-// Función para obtener el nombre completo del accesorio
 function obtenerNombreAccesorio(id) {
     for (let tipo in accesorios) {
         for (let nombre in accesorios[tipo]) {
@@ -371,13 +342,11 @@ function obtenerNombreAccesorio(id) {
     return 'Accesorio desconocido';
 }
 
-// Función para copiar texto al portapapeles
 function copiarTexto(texto) {
     navigator.clipboard.writeText(texto).then(() => {
         mostrarMensajeCopiado();
     }).catch(err => {
         console.error('Error al copiar: ', err);
-        // Fallback para navegadores antiguos
         const textArea = document.createElement('textarea');
         textArea.value = texto;
         document.body.appendChild(textArea);
@@ -388,21 +357,10 @@ function copiarTexto(texto) {
     });
 }
 
-// Función para mostrar mensaje de copiado
 function mostrarMensajeCopiado() {
     const mensaje = document.createElement('div');
     mensaje.className = 'copy-message';
     mensaje.textContent = '¡Clase copiada!';
-    mensaje.style.position = 'fixed';
-    mensaje.style.top = '20px';
-    mensaje.style.right = '20px';
-    mensaje.style.background = '#2ecc71';
-    mensaje.style.color = 'white';
-    mensaje.style.padding = '10px 20px';
-    mensaje.style.borderRadius = '5px';
-    mensaje.style.zIndex = '1000';
-    mensaje.style.boxShadow = '0 4px 6px rgba(0, 0, 0, 0.1)';
-    
     document.body.appendChild(mensaje);
     
     setTimeout(() => {
@@ -410,10 +368,9 @@ function mostrarMensajeCopiado() {
     }, 2000);
 }
 
-// Event listeners
-document.addEventListener('DOMContentLoaded', function() {
+// Inicializar eventos cuando el usuario está autenticado
+function initApp() {
     document.getElementById('calculate').addEventListener('click', function() {
-        // Obtener atributos seleccionados
         const atributosSeleccionados = [];
         const checkboxes = document.querySelectorAll('.attribute-checkbox input:checked');
         
@@ -421,21 +378,21 @@ document.addEventListener('DOMContentLoaded', function() {
             atributosSeleccionados.push(checkbox.value);
         });
         
-        // Calcular mejores combinaciones
         const resultados = calcularMejoresCombinaciones(atributosSeleccionados);
-        
-        // Mostrar resultados
         mostrarResultados(atributosSeleccionados, resultados);
     });
 
     document.getElementById('clear').addEventListener('click', function() {
-        // Desmarcar todos los checkboxes
         const checkboxes = document.querySelectorAll('.attribute-checkbox input');
         checkboxes.forEach(checkbox => {
             checkbox.checked = false;
         });
         
-        // Limpiar resultados
         document.getElementById('results').innerHTML = '';
     });
+}
+
+// Escuchar evento de autenticación
+window.addEventListener('authSuccess', () => {
+    initApp();
 });
