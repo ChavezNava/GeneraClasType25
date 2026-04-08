@@ -74,70 +74,142 @@ function calcularMejoresCombinaciones(atributosSeleccionados) {
     return resultados;
 }
 
-// Función corregida: encuentra la mejor combinación seleccionando los mejores accesorios individuales
-function encontrarMejorCombinacion(atributosSeleccionados, cantidadDeseada) {
-    // Obtener todos los accesorios con su puntuación
-    const todosAccesorios = [];
+// Nueva función que calcula puntuación priorizando los atributos seleccionados
+function calcularPuntuacionAvanzada(accesorio, atributosSeleccionados) {
+    let puntuacion = 0;
     
-    for (let categoria in accesorios) {
-        for (let nombre in accesorios[categoria]) {
-            const accesorio = accesorios[categoria][nombre];
-            const puntuacion = calcularPuntuacionParaAtributos(accesorio, atributosSeleccionados);
-            todosAccesorios.push({
-                ...accesorio,
-                categoria: categoria,
-                nombre: nombre,
-                puntuacion: puntuacion
-            });
+    // Para cada atributo seleccionado, calcular su contribución
+    for (let atributo of atributosSeleccionados) {
+        const valor = accesorio[atributo];
+        
+        // Dar peso extra a valores positivos y castigar más los negativos
+        if (valor > 0) {
+            // Los atributos positivos tienen peso aumentado
+            puntuacion += valor * 2;
+        } else if (valor < 0) {
+            // Los atributos negativos tienen peso reducido (menos castigo)
+            puntuacion += valor * 0.5;
         }
     }
     
-    // Ordenar por puntuación de mayor a menor
-    todosAccesorios.sort((a, b) => b.puntuacion - a.puntuacion);
+    return puntuacion;
+}
+
+// Función para encontrar el mejor accesorio para un atributo específico
+function encontrarMejorAccesorioPorAtributo(atributo, categoriaExcluir = null) {
+    let mejorAccesorio = null;
+    let mejorValor = -Infinity;
     
-    // Seleccionar los mejores asegurando que no se repitan categorías
+    for (let categoria in accesorios) {
+        if (categoriaExcluir === categoria) continue;
+        
+        for (let nombre in accesorios[categoria]) {
+            const accesorio = accesorios[categoria][nombre];
+            const valor = accesorio[atributo];
+            
+            if (valor > mejorValor) {
+                mejorValor = valor;
+                mejorAccesorio = {
+                    ...accesorio,
+                    categoria: categoria,
+                    nombre: nombre
+                };
+            }
+        }
+    }
+    
+    return mejorAccesorio;
+}
+
+// Función corregida que prioriza los mejores accesorios para cada atributo
+function encontrarMejorCombinacion(atributosSeleccionados, cantidadDeseada) {
+    if (atributosSeleccionados.length === 0) return null;
+    
     const seleccionados = [];
     const categoriasUsadas = new Set();
     
-    for (let accesorio of todosAccesorios) {
+    // Estrategia: Para cada atributo seleccionado, encontrar su mejor accesorio
+    for (let atributo of atributosSeleccionados) {
         if (seleccionados.length >= cantidadDeseada) break;
         
-        // Si la categoría ya está usada, saltar
-        if (categoriasUsadas.has(accesorio.categoria)) continue;
+        const mejorAcc = encontrarMejorAccesorioPorAtributo(atributo);
         
-        seleccionados.push(accesorio);
-        categoriasUsadas.add(accesorio.categoria);
+        if (mejorAcc && !categoriasUsadas.has(mejorAcc.categoria)) {
+            // Calcular puntuación para este accesorio basado en todos los atributos seleccionados
+            const puntuacion = calcularPuntuacionAvanzada(mejorAcc, atributosSeleccionados);
+            
+            seleccionados.push({
+                ...mejorAcc,
+                puntuacion: puntuacion
+            });
+            categoriasUsadas.add(mejorAcc.categoria);
+        }
     }
     
-    // Si no se pudo alcanzar la cantidad deseada por limitación de categorías
+    // Si aún necesitamos más accesorios, completar con los mejores por puntuación general
     if (seleccionados.length < cantidadDeseada) {
-        // Reiniciar y seleccionar permitiendo repetición de categorías (pero no del mismo accesorio)
-        const seleccionadosSinLimite = [];
-        const idsUsados = new Set();
+        const todosAccesorios = [];
         
-        for (let accesorio of todosAccesorios) {
-            if (seleccionadosSinLimite.length >= cantidadDeseada) break;
-            if (!idsUsados.has(accesorio.Id)) {
-                seleccionadosSinLimite.push(accesorio);
-                idsUsados.add(accesorio.Id);
+        for (let categoria in accesorios) {
+            if (categoriasUsadas.has(categoria)) continue;
+            
+            for (let nombre in accesorios[categoria]) {
+                const accesorio = accesorios[categoria][nombre];
+                const puntuacion = calcularPuntuacionAvanzada(accesorio, atributosSeleccionados);
+                
+                todosAccesorios.push({
+                    ...accesorio,
+                    categoria: categoria,
+                    nombre: nombre,
+                    puntuacion: puntuacion
+                });
             }
         }
         
-        if (seleccionadosSinLimite.length === cantidadDeseada) {
-            const estadisticasFinales = calcularEstadisticasFinales(seleccionadosSinLimite);
-            const puntuacionTotal = calcularPuntuacionTotal(estadisticasFinales, atributosSeleccionados);
-            const mejoraAtributos = calcularMejoraAtributos(atributosSeleccionados, estadisticasFinales);
-            
-            return {
-                accesorios: seleccionadosSinLimite,
-                puntuacionTotal: puntuacionTotal,
-                estadisticasFinales: estadisticasFinales,
-                mejoraAtributos: mejoraAtributos
-            };
+        // Ordenar por puntuación descendente
+        todosAccesorios.sort((a, b) => b.puntuacion - a.puntuacion);
+        
+        // Agregar los mejores que no estén ya seleccionados
+        for (let acc of todosAccesorios) {
+            if (seleccionados.length >= cantidadDeseada) break;
+            if (!categoriasUsadas.has(acc.categoria)) {
+                seleccionados.push(acc);
+                categoriasUsadas.add(acc.categoria);
+            }
+        }
+    }
+    
+    // Si aún no alcanzamos la cantidad deseada, permitir repetición de categorías
+    if (seleccionados.length < cantidadDeseada) {
+        const todosAccesorios = [];
+        
+        for (let categoria in accesorios) {
+            for (let nombre in accesorios[categoria]) {
+                const accesorio = accesorios[categoria][nombre];
+                const yaSeleccionado = seleccionados.some(s => s.Id === accesorio.Id);
+                
+                if (!yaSeleccionado) {
+                    const puntuacion = calcularPuntuacionAvanzada(accesorio, atributosSeleccionados);
+                    todosAccesorios.push({
+                        ...accesorio,
+                        categoria: categoria,
+                        nombre: nombre,
+                        puntuacion: puntuacion
+                    });
+                }
+            }
         }
         
-        return null;
+        todosAccesorios.sort((a, b) => b.puntuacion - a.puntuacion);
+        
+        for (let acc of todosAccesorios) {
+            if (seleccionados.length >= cantidadDeseada) break;
+            seleccionados.push(acc);
+        }
     }
+    
+    // Ordenar por ID para consistencia
+    seleccionados.sort((a, b) => a.Id.localeCompare(b.Id));
     
     // Calcular estadísticas finales
     const estadisticasFinales = calcularEstadisticasFinales(seleccionados);
