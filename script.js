@@ -1,6 +1,6 @@
 // Datos del arma base
 const baseWeapon = {
-    nombre: "Type 25-",
+    nombre: "Type 250-",
     dano: 24,
     cadencia: 86,
     precision: 44,
