@@ -62,88 +62,90 @@ const accesorios = {
 // Función principal para calcular las mejores combinaciones
 function calcularMejoresCombinaciones(atributosSeleccionados) {
     const resultados = {};
-    
+
     for (let cantidad = 1; cantidad <= 5; cantidad++) {
-        const mejorCombinacion = encontrarMejorCombinacionConCategorias(
-            atributosSeleccionados, 
-            cantidad
-        );
+        const mejorCombinacion = encontrarMejorCombinacion(atributosSeleccionados, cantidad);
         
-        if (mejorCombinacion) {
+        if (mejorCombinacion && mejorCombinacion.accesorios.length === cantidad) {
             resultados[cantidad] = mejorCombinacion;
         }
     }
-    
+
     return resultados;
 }
 
-function encontrarMejorCombinacionConCategorias(atributosSeleccionados, cantidadDeseada) {
-    const todosAccesorios = obtenerTodosAccesoriosOrganizados();
-    const mejoresPorCategoria = {};
+// Función corregida: encuentra la mejor combinación seleccionando los mejores accesorios individuales
+function encontrarMejorCombinacion(atributosSeleccionados, cantidadDeseada) {
+    // Obtener todos los accesorios con su puntuación
+    const todosAccesorios = [];
     
-    for (let categoria in todosAccesorios) {
-        let mejorAccesorio = null;
-        let mejorPuntuacion = -Infinity;
-        
-        todosAccesorios[categoria].forEach(accesorio => {
+    for (let categoria in accesorios) {
+        for (let nombre in accesorios[categoria]) {
+            const accesorio = accesorios[categoria][nombre];
             const puntuacion = calcularPuntuacionParaAtributos(accesorio, atributosSeleccionados);
-            if (puntuacion > mejorPuntuacion) {
-                mejorPuntuacion = puntuacion;
-                mejorAccesorio = accesorio;
-            }
-        });
+            todosAccesorios.push({
+                ...accesorio,
+                categoria: categoria,
+                nombre: nombre,
+                puntuacion: puntuacion
+            });
+        }
+    }
+    
+    // Ordenar por puntuación de mayor a menor
+    todosAccesorios.sort((a, b) => b.puntuacion - a.puntuacion);
+    
+    // Seleccionar los mejores asegurando que no se repitan categorías
+    const seleccionados = [];
+    const categoriasUsadas = new Set();
+    
+    for (let accesorio of todosAccesorios) {
+        if (seleccionados.length >= cantidadDeseada) break;
         
-        if (mejorAccesorio) {
-            mejoresPorCategoria[categoria] = {
-                accesorio: mejorAccesorio,
-                puntuacion: mejorPuntuacion
+        // Si la categoría ya está usada, saltar
+        if (categoriasUsadas.has(accesorio.categoria)) continue;
+        
+        seleccionados.push(accesorio);
+        categoriasUsadas.add(accesorio.categoria);
+    }
+    
+    // Si no se pudo alcanzar la cantidad deseada por limitación de categorías
+    if (seleccionados.length < cantidadDeseada) {
+        // Reiniciar y seleccionar permitiendo repetición de categorías (pero no del mismo accesorio)
+        const seleccionadosSinLimite = [];
+        const idsUsados = new Set();
+        
+        for (let accesorio of todosAccesorios) {
+            if (seleccionadosSinLimite.length >= cantidadDeseada) break;
+            if (!idsUsados.has(accesorio.Id)) {
+                seleccionadosSinLimite.push(accesorio);
+                idsUsados.add(accesorio.Id);
+            }
+        }
+        
+        if (seleccionadosSinLimite.length === cantidadDeseada) {
+            const estadisticasFinales = calcularEstadisticasFinales(seleccionadosSinLimite);
+            const puntuacionTotal = calcularPuntuacionTotal(estadisticasFinales, atributosSeleccionados);
+            const mejoraAtributos = calcularMejoraAtributos(atributosSeleccionados, estadisticasFinales);
+            
+            return {
+                accesorios: seleccionadosSinLimite,
+                puntuacionTotal: puntuacionTotal,
+                estadisticasFinales: estadisticasFinales,
+                mejoraAtributos: mejoraAtributos
             };
         }
-    }
-    
-    const categoriasOrdenadas = Object.keys(mejoresPorCategoria).sort((a, b) => {
-        return mejoresPorCategoria[b].puntuacion - mejoresPorCategoria[a].puntuacion;
-    });
-    
-    const combinacion = [];
-    for (let i = 0; i < Math.min(cantidadDeseada, categoriasOrdenadas.length); i++) {
-        const categoria = categoriasOrdenadas[i];
-        combinacion.push(mejoresPorCategoria[categoria].accesorio);
-    }
-    
-    if (combinacion.length < cantidadDeseada) {
-        const categoriasRestantes = Object.keys(todosAccesorios).filter(
-            cat => !combinacion.some(acc => obtenerCategoriaPorId(acc.Id) === cat)
-        );
         
-        for (let categoria of categoriasRestantes) {
-            if (combinacion.length >= cantidadDeseada) break;
-            
-            let mejorAccesorio = null;
-            let mejorPuntuacion = -Infinity;
-            
-            todosAccesorios[categoria].forEach(accesorio => {
-                const puntuacion = calcularPuntuacionParaAtributos(accesorio, atributosSeleccionados);
-                if (puntuacion > mejorPuntuacion) {
-                    mejorPuntuacion = puntuacion;
-                    mejorAccesorio = accesorio;
-                }
-            });
-            
-            if (mejorAccesorio) {
-                combinacion.push(mejorAccesorio);
-            }
-        }
+        return null;
     }
     
-    combinacion.sort((a, b) => a.Id.localeCompare(b.Id));
-    
-    const estadisticasFinales = calcularEstadisticasFinales(combinacion);
+    // Calcular estadísticas finales
+    const estadisticasFinales = calcularEstadisticasFinales(seleccionados);
     const puntuacionTotal = calcularPuntuacionTotal(estadisticasFinales, atributosSeleccionados);
     const mejoraAtributos = calcularMejoraAtributos(atributosSeleccionados, estadisticasFinales);
     
     return {
-        accesorios: combinacion,
+        accesorios: seleccionados,
         puntuacionTotal: puntuacionTotal,
         estadisticasFinales: estadisticasFinales,
         mejoraAtributos: mejoraAtributos
@@ -152,14 +154,14 @@ function encontrarMejorCombinacionConCategorias(atributosSeleccionados, cantidad
 
 function obtenerTodosAccesoriosOrganizados() {
     const organizados = {};
-    
+
     for (let categoria in accesorios) {
         organizados[categoria] = [];
         for (let nombre in accesorios[categoria]) {
             organizados[categoria].push(accesorios[categoria][nombre]);
         }
     }
-    
+
     return organizados;
 }
 
@@ -184,15 +186,17 @@ function calcularPuntuacionParaAtributos(accesorio, atributosSeleccionados) {
 
 function calcularEstadisticasFinales(accesoriosSeleccionados) {
     const estadisticas = { ...baseWeapon };
-    
+
     accesoriosSeleccionados.forEach(accesorio => {
         for (let stat in accesorio) {
-            if (stat !== 'Id' && stat !== 'nombre') {
-                estadisticas[stat] += accesorio[stat];
+            if (stat !== 'Id' && stat !== 'nombre' && stat !== 'categoria' && stat !== 'puntuacion') {
+                if (typeof estadisticas[stat] === 'number') {
+                    estadisticas[stat] += accesorio[stat];
+                }
             }
         }
     });
-    
+
     return estadisticas;
 }
 
@@ -207,11 +211,11 @@ function calcularPuntuacionTotal(estadisticasFinales, atributosSeleccionados) {
 function calcularMejoraAtributos(atributosSeleccionados, estadisticasFinales) {
     const mejora = {};
     const estadisticasBase = { ...baseWeapon };
-    
+
     atributosSeleccionados.forEach(atributo => {
         mejora[atributo] = estadisticasFinales[atributo] - estadisticasBase[atributo];
     });
-    
+
     return mejora;
 }
 
@@ -236,78 +240,78 @@ function formatearAtributo(atributo) {
 function mostrarResultados(atributosSeleccionados, resultados) {
     const resultadosContainer = document.getElementById('results');
     resultadosContainer.innerHTML = '';
-    
+
     if (atributosSeleccionados.length === 0) {
         resultadosContainer.innerHTML = '<div class="no-results">Selecciona al menos un atributo para calcular las mejores configuraciones</div>';
         return;
     }
-    
+
     const resultCard = document.createElement('div');
     resultCard.className = 'result-card';
-    
+
     const resultHeader = document.createElement('div');
     resultHeader.className = 'result-header';
-    
+
     const atributosTexto = atributosSeleccionados.map(atributo => formatearAtributo(atributo)).join(', ');
     const resultTitle = document.createElement('h3');
     resultTitle.className = 'result-title';
     resultTitle.textContent = `Mejores Configuraciones para: ${atributosTexto}`;
-    
+
     resultHeader.appendChild(resultTitle);
     resultCard.appendChild(resultHeader);
-    
+
     const resultadosList = document.createElement('div');
     resultadosList.className = 'resultados-list';
-    
+
     for (let cantidad in resultados) {
         const combinacion = resultados[cantidad];
         const item = document.createElement('div');
         item.className = 'resultado-item';
-        
+
         const configName = document.createElement('div');
         configName.className = 'config-name';
         configName.textContent = generarNombreConfiguracion(combinacion.accesorios);
-        
+
         const configDesc = document.createElement('div');
         configDesc.className = 'config-desc';
-        
+
         const mejoraText = atributosSeleccionados.map(atributo => {
             const mejora = combinacion.mejoraAtributos[atributo];
             const signo = mejora > 0 ? '+' : '';
             return `${formatearAtributo(atributo)}: ${signo}${mejora}`;
         }).join(' | ');
-        
+
         const categoriasUtilizadas = combinacion.accesorios.map(acc => 
             obtenerCategoriaPorId(acc.Id)
         ).join(', ');
-        
+
         configDesc.innerHTML = `
             <strong>${cantidad} accesorio(s)</strong><br>
             ${mejoraText}<br>
             <small>Categorías: ${categoriasUtilizadas}</small>
         `;
-        
+
         const copyBtn = document.createElement('button');
         copyBtn.className = 'copy-btn';
         copyBtn.textContent = 'Copiar';
         copyBtn.onclick = () => copiarTexto(generarNombreConfiguracion(combinacion.accesorios));
-        
+
         const detallesBtn = document.createElement('button');
         detallesBtn.className = 'detalles-btn';
         detallesBtn.textContent = 'Ver Accesorios';
         detallesBtn.onclick = () => mostrarDetallesAccesorios(combinacion.accesorios);
-        
+
         const accionesContainer = document.createElement('div');
         accionesContainer.className = 'acciones-container';
         accionesContainer.appendChild(copyBtn);
         accionesContainer.appendChild(detallesBtn);
-        
+
         item.appendChild(configName);
         item.appendChild(configDesc);
         item.appendChild(accionesContainer);
         resultadosList.appendChild(item);
     }
-    
+
     resultCard.appendChild(resultadosList);
     resultadosContainer.appendChild(resultCard);
 }
@@ -317,17 +321,17 @@ function mostrarDetallesAccesorios(accesorios) {
         const nombre = obtenerNombreAccesorio(accesorio.Id);
         const categoria = obtenerCategoriaPorId(accesorio.Id);
         const stats = [];
-        
+
         for (let stat in accesorio) {
-            if (stat !== 'Id' && stat !== 'nombre' && accesorio[stat] !== 0) {
+            if (stat !== 'Id' && stat !== 'nombre' && stat !== 'categoria' && stat !== 'puntuacion' && accesorio[stat] !== 0) {
                 const signo = accesorio[stat] > 0 ? '+' : '';
                 stats.push(`${formatearAtributo(stat)}: ${signo}${accesorio[stat]}`);
             }
         }
-        
+
         return `${nombre} (${accesorio.Id}) - ${categoria}: ${stats.join(', ')}`;
     }).join('\n');
-    
+
     alert('Accesorios utilizados:\n\n' + detalles);
 }
 
@@ -362,7 +366,7 @@ function mostrarMensajeCopiado() {
     mensaje.className = 'copy-message';
     mensaje.textContent = '¡Clase copiada!';
     document.body.appendChild(mensaje);
-    
+
     setTimeout(() => {
         document.body.removeChild(mensaje);
     }, 2000);
@@ -373,11 +377,11 @@ function initApp() {
     document.getElementById('calculate').addEventListener('click', function() {
         const atributosSeleccionados = [];
         const checkboxes = document.querySelectorAll('.attribute-checkbox input:checked');
-        
+
         checkboxes.forEach(checkbox => {
             atributosSeleccionados.push(checkbox.value);
         });
-        
+
         const resultados = calcularMejoresCombinaciones(atributosSeleccionados);
         mostrarResultados(atributosSeleccionados, resultados);
     });
@@ -387,7 +391,7 @@ function initApp() {
         checkboxes.forEach(checkbox => {
             checkbox.checked = false;
         });
-        
+
         document.getElementById('results').innerHTML = '';
     });
 }
