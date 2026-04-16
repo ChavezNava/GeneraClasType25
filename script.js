@@ -2,7 +2,7 @@
 const baseWeapon = {
     nombre: "Type 25-",
     dano: 24,
-    cadencia: 86,
+    cadencia: 85,
     precision: 44,
     movilidad: 83,
     alcance: 47,
